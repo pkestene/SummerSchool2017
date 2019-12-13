@@ -17,7 +17,7 @@ OBJ = main.o system.o dump.o
 ${EXNAME}: $(OBJ) chkopts
 	-${CLINKER} -o $@ $(OBJ) ${PETSC_TS_LIB}
 
-clean ::
+clean :
 	rm -f ${EXNAME} $(OBJ) output.* out.m
 
 # Some tests (with hard-coded bash color codes)
