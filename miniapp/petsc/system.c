@@ -150,10 +150,10 @@ PetscErrorCode RHSFunction(TS ts,PetscReal t,Vec u,Vec f,void* ptr)
 
 #undef __FUNCT__
 #define __FUNCT__ "InitialConditions"
-PetscErrorCode InitialConditions(Vec u0,void *ptr)
+PetscErrorCode InitialConditions(Vec u0,AppCtx *ctx)
 {
   PetscErrorCode ierr;
-  AppCtx         *ctx = (AppCtx*) ptr;
+  //AppCtx         *ctx = (AppCtx*) ptr;
   PetscScalar    **u0arr;
   DM             da=ctx->da, cda;
   DMDALocalInfo  info;
