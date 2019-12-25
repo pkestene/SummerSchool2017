@@ -199,6 +199,7 @@ void ss_cg(Field& x, Field const& b, const int maxiters, const double tol, bool&
         return;
     }
 
+    // cg iterations
     int iter;
     for(iter=0; iter<maxiters; iter++) {
         // Ap = A*p
@@ -233,6 +234,9 @@ void ss_cg(Field& x, Field const& b, const int maxiters, const double tol, bool&
 
     if (!success)
         std::cerr << "ERROR: CG failed to converge" << std::endl;
-}
+
+    // we found a solution to linear our linear system : A x = b
+
+} // end ss_cg
 
 } // namespace linalg

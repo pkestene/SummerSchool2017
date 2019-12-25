@@ -168,16 +168,22 @@ int main(int argc, char* argv[])
     // main timeloop
     for (int timestep = 1; timestep <= nt; timestep++)
     {
-        // set x_new and x_old to be the solution
-        ss_copy(x_old, x_new, N);
+      // set x_new and x_old to be the solution
+      // x_old = x_new
+      ss_copy(x_old, x_new, N);
 
         double residual;
         bool converged = false;
         int it;
+        // each Newton iteration requires a linear system solve
         for (it=0; it<max_newton_iters; it++)
         {
             // compute residual : requires both x_new and x_old
+            // computes b; will contain the RHS of the linear system to solve 
             diffusion(x_new, b);
+
+            // residual = sqrt(sum(b[i]))
+            // residual = || b ||_2
             residual = ss_norm2(b, N);
 
             // check for convergence
@@ -187,16 +193,21 @@ int main(int argc, char* argv[])
                 break;
             }
 
-            // solve linear system to get -deltax
+            // solve linear system J  * (-delta) = b to get -deltax
+            // J is the Jacobian of matrix f_{i,j} (see slides)
+            // here Jacobian is approximated by finite differences, could
+            // also be computed analytically (see petsc code)
             bool cg_converged = false;
             ss_cg(deltax, b, max_cg_iters, tolerance, cg_converged);
 
             // check that the CG solver converged
             if (!cg_converged) break;
 
-            // update solution
+            // update solution in time
             ss_axpy(x_new, -1.0, deltax, N);
         }
+
+        // update total number of Newton's iterations
         iters_newton += it+1;
 
         // output some statistics
@@ -211,7 +222,8 @@ int main(int argc, char* argv[])
                       << " ERROR : nonlinear iterations failed to converge" << std::endl;;
             break;
         }
-    }
+
+    } // end timeloop
 
     // get times
     timespent += omp_get_wtime();
