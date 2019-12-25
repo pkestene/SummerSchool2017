@@ -72,6 +72,15 @@ int main(int argc,char **argv)
       */
   PetscInitialize(&argc,&argv,(char*)0,help);
 
+  {
+    char petsc_version[128];
+    ierr = PetscGetVersion(petsc_version,sizeof(petsc_version));CHKERRQ(ierr);
+    
+    PetscPrintf(PETSC_COMM_WORLD,"########################################\n");
+    PetscPrintf(PETSC_COMM_WORLD,"Running petsc version: %s\n", petsc_version);
+    PetscPrintf(PETSC_COMM_WORLD,"########################################\n");
+  }
+
   /* Default problem sizes.
      Note that this is only done here to give an interface similar to the
      previous examples. This information is stored by a DMDA object as well.
@@ -108,6 +117,11 @@ int main(int argc,char **argv)
     that the library is safe to use within a larger MPI program.
    */
   ierr = DMDACreate2d(PETSC_COMM_WORLD, DM_BOUNDARY_NONE, DM_BOUNDARY_NONE,DMDA_STENCIL_STAR,ctx.nx,ctx.ny,PETSC_DECIDE,PETSC_DECIDE,1,1,NULL,NULL,&da);CHKERRQ(ierr);
+
+#if PETSC_VERSION_GE(3, 8, 0)
+  ierr = DMSetFromOptions(da);CHKERRQ(ierr);
+  ierr = DMSetUp(da);CHKERRQ(ierr);
+#endif
 
   /* Specify uniform coordinates on the 2D domain. The number of points in the x direction, which is of unit width, determines the size of the square cells */
   ierr = DMDASetUniformCoordinates(da,0.0,1.0,0.0,((PetscReal)ctx.ny)/ctx.nx,0,0);CHKERRQ(ierr);
@@ -151,8 +165,13 @@ int main(int argc,char **argv)
   }
 
   /* Set the timestep and final time */
+#if PETSC_VERSION_GE(3, 8, 0)
+  ierr = TSSetTimeStep(ts,((PetscReal) t)/nt);CHKERRQ(ierr);
+  ierr = TSSetMaxTime(ts,t);CHKERRQ(ierr);
+#else
   ierr = TSSetTimeStep(ts,((PetscReal) t)/nt);CHKERRQ(ierr);
   ierr = TSSetDuration(ts,nt,t);CHKERRQ(ierr);
+#endif
   ierr = TSSetExactFinalTime(ts,TS_EXACTFINALTIME_MATCHSTEP);CHKERRQ(ierr);
 
   /* Choose the method of time integration */

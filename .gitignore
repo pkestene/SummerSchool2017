@@ -33,3 +33,6 @@ main
 *.mod
 
 unit_tests
+
+.ccls-cache
+
